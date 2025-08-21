@@ -1,74 +1,83 @@
+/* predictable sizing */
+* { box-sizing: border-box; }
+
+/* page centering */
 body {
-    background-color: #1C1C1C;
-    margin: 0;
-    color: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: "Karla", sans-serif;
-    
-
+  background-color: #1C1C1C;
+  margin: 0;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Karla", sans-serif;
+  min-height: 100vh;
 }
 
+/* responsive card */
 .box {
-    background-color: #1F2937;
-    width: 450px;
-    height: 450px;
-    display: flex;
-    flex-direction: column;
-    align-items: left;
-    justify-content: center;
-    padding: 52px;
-    border-radius: 6px;
+  background-color: #1F2937;
+  width: 90%;            /* fluid on small screens */
+  max-width: 450px;      /* caps at desktop size */
+  /* remove fixed height so content can grow/shrink */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* left alignment in flexbox */
+  justify-content: center;
+  padding: 32px;
+  border-radius: 6px;
 }
 
+/* button: full width but capped */
 button {
-    width: 200px;
-    height: 40px;
-    background-color: #10B981;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    font-weight: 500;
-    font-size: 16px;
-    margin-top: 51px
+  width: 100%;
+  max-width: 200px;
+  height: 40px;
+  background-color: #10B981;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 16px;
+  margin-top: 24px;
 }
 
+/* password container: allow wrap */
 #password {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;       /* wrap on narrow viewports */
+  gap: 12px;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-top: 18px;
 }
 
+/* password boxes: flexible */
 .password {
-    width: 215px;
-    height: 40px;
-    background-color: #273549;
-    border-radius: 6px;
-    color:#10B981;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 500;
-    font-size: 16px;
+  flex: 1 1 48%;         /* grow, shrink, base 48% so two fit side-by-side */
+  min-width: 140px;      /* prevent becoming too small */
+  height: 40px;
+  background-color: #273549;
+  border-radius: 6px;
+  color: #10B981;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+  font-size: 16px;
 }
 
-hr {
-    border: 1px solid #2F3E53;
-    margin: 35px 0;
-}
+/* visuals */
+hr { border: 1px solid #2F3E53; margin: 24px 0; }
+p { margin: 0; }
+h1 { font-weight: 800; margin: 10px 0; }
+#green { color: #10B981; }
 
-p{
-    margin: 0px
-}
-
-h1 {
-    font-weight: 800;
-    font-style: extra-bold;
-    margin: 10px 0px;
-}
-
-#green {
-    color: #10B981;
+/* tweaks for very small screens */
+@media (max-width: 420px) {
+  .box { padding: 20px; }
+  .password { font-size: 14px; height: 36px; min-width: 120px; }
+  button { max-width: 100%; }
+  h1 { font-size: 20px; line-height: 1.1; }
 }
