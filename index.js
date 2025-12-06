@@ -275,7 +275,74 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('keydown', (ev) => {
         if (ev.key === 'Escape') closeBreakdownModal();
     });
+
+    // Load saved options from localStorage (if any) and wire change handlers
+    loadOptions();
+
+    // save options when controls change
+    const wc = document.getElementById('wordCount');
+    const sep = document.getElementById('separator');
+    const addSym = document.getElementById('addSymbol');
+    if (wc) wc.addEventListener('change', saveOptions);
+    if (sep) sep.addEventListener('input', saveOptions);
+    if (addSym) addSym.addEventListener('change', saveOptions);
+
+    // Do not auto-generate on load. Leave the passphrase blank so users must
+    // explicitly generate one each session. Clear any previous display.
+    const out = document.getElementById('password1');
+    if (out) {
+        out.textContent = '';
+        // ensure measurement/fit logic runs to reset any state
+        fitTextToContainer(out);
+        out.removeAttribute('title');
+    }
+    const metaEl = document.getElementById('passInfo');
+    if (metaEl) metaEl.textContent = '\u00A0';
 });
+
+// LocalStorage helpers for persisting user options
+const LS_KEY = 'passgen_options_v1';
+
+function getOptionsFromDOM() {
+    const wc = document.getElementById('wordCount');
+    const sep = document.getElementById('separator');
+    const addSym = document.getElementById('addSymbol');
+    return {
+        wordCount: wc ? wc.value : null,
+        separator: sep ? sep.value : null,
+        addSymbol: addSym ? !!addSym.checked : null
+    };
+}
+
+function applyOptionsToDOM(opts) {
+    if (!opts) return;
+    const wc = document.getElementById('wordCount');
+    const sep = document.getElementById('separator');
+    const addSym = document.getElementById('addSymbol');
+    if (wc && opts.wordCount != null) wc.value = String(opts.wordCount);
+    if (sep && opts.separator != null) sep.value = String(opts.separator);
+    if (addSym && opts.addSymbol != null) addSym.checked = !!opts.addSymbol;
+}
+
+function saveOptions() {
+    try {
+        const opts = getOptionsFromDOM();
+        localStorage.setItem(LS_KEY, JSON.stringify(opts));
+    } catch (err) {
+        console.warn('Could not save options to localStorage', err);
+    }
+}
+
+function loadOptions() {
+    try {
+        const raw = localStorage.getItem(LS_KEY);
+        if (!raw) return;
+        const opts = JSON.parse(raw);
+        applyOptionsToDOM(opts);
+    } catch (err) {
+        console.warn('Could not load options from localStorage', err);
+    }
+}
 
 function copyText(e) {
     const el = e.target;
