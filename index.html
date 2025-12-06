@@ -23,6 +23,10 @@
                 <label style="font-size:14px">Separator:
                     <input id="separator" class="compact-input" type="text" value="-" maxlength="3" style="margin-left:6px;" />
                 </label>
+                <label style="font-size:14px; display:flex; align-items:center; gap:6px;">
+                        <input id="addSymbol" type="checkbox" style="width:18px; height:18px;" checked />
+                    <span style="font-size:14px;">Special char</span>
+                </label>
             </div>
 
             <button id="generate" onclick="generatePassphrase()">Generate</button>
@@ -32,6 +36,24 @@
             </div>
             <div id="passmeta" style="margin-top:8px;">
                 <small id="passInfo">&nbsp;</small>
+            </div>
+            <!-- Breakdown modal -->
+            <div id="breakdownModal" class="modal-overlay" hidden>
+                <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+                    <button class="modal-close" aria-label="Close">×</button>
+                    <h3 id="modalTitle">Passphrase entropy breakdown</h3>
+                    <div class="modal-content">
+                        <ul id="breakdownList">
+                            <li><strong>Words:</strong> <span id="bdWords">—</span></li>
+                            <li><strong>Capitalization:</strong> <span id="bdCaps">—</span></li>
+                            <li><strong>Digits:</strong> <span id="bdDigits">—</span></li>
+                            <li><strong>Symbols:</strong> <span id="bdSymbols">—</span></li>
+                            <li><strong>Total entropy:</strong> <span id="bdTotal">—</span></li>
+                            <li><strong>Wordlist size:</strong> <span id="bdListSize">—</span></li>
+                            <li><strong>Recommend:</strong> <span id="bdRecommendation">—</span></li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
         <script src="index.js"></script>

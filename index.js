@@ -24,6 +24,9 @@ function randInt(max) {
     return Math.floor(Math.random() * max);
 }
 
+// Small set of special characters used when the 'Add special char' option is enabled
+const SPECIALS = ['!', '@', '#', '$', '%', '^', '&', '*', '?', '~'];
+
 function pickWords(count) {
     const picked = [];
     for (let i = 0; i < count; i++) {
@@ -72,6 +75,25 @@ function insertRandomDigitsIntoWords(wordsArr) {
     });
 }
 
+function insertRandomSpecialCharsIntoWords(wordsArr) {
+    // Insert a single special character at the beginning or end of 1 or 2 randomly
+    // chosen words. Never insert in the middle of a word.
+    if (wordsArr.length === 0) return;
+    const maxTargets = Math.min(2, wordsArr.length);
+    const numTargets = 1 + randInt(maxTargets); // 1 or 2 when possible
+    const chosen = new Set();
+    while (chosen.size < numTargets) {
+        chosen.add(randInt(wordsArr.length));
+    }
+
+    chosen.forEach(idx => {
+        const sym = SPECIALS[randInt(SPECIALS.length)];
+        // decide to place at start or end (50/50)
+        const placeAtStart = randInt(2) === 0;
+        wordsArr[idx] = placeAtStart ? (sym + wordsArr[idx]) : (wordsArr[idx] + sym);
+    });
+}
+
 function createPassphrase(count = 4, separator = "-") {
     const picked = pickWords(count);
     randomizeFirstLetters(picked);
@@ -84,8 +106,13 @@ function generatePassphrase() {
     const sepInput = document.getElementById("separator");
     const count = Math.max(1, Math.min(12, parseInt(countInput.value) || 4));
     const sep = sepInput.value || "-";
-
-    const pass = createPassphrase(count, sep);
+    // Build passphrase from words array so we can optionally insert symbols
+    const picked = pickWords(count);
+    randomizeFirstLetters(picked);
+    insertRandomDigitsIntoWords(picked);
+    const addSymbols = !!document.getElementById('addSymbol') && document.getElementById('addSymbol').checked;
+    if (addSymbols) insertRandomSpecialCharsIntoWords(picked);
+    const pass = picked.join(sep);
     const out = document.getElementById("password1");
     out.textContent = pass;
     fitTextToContainer(out, 14, 20);
@@ -93,13 +120,14 @@ function generatePassphrase() {
     // update metadata: character length and word count
     const meta = document.getElementById('passInfo');
     if (meta) {
-        const bits = estimateEntropy(count);
+        const addSymbols = !!document.getElementById('addSymbol') && document.getElementById('addSymbol').checked;
+        const bits = estimateEntropy(count, addSymbols, SPECIALS.length);
         const label = strengthLabel(bits);
         meta.textContent = `${pass.length} characters · ${count} words · ${Math.round(bits)} bits (${label})`;
     }
 }
 
-function estimateEntropy(count) {
+function estimateEntropy(count, symbolsEnabled = false, symbolSetSize = 10) {
     // Words entropy based on current wordlist size
     const listSize = Math.max(1, words.length);
     const bitsPerWord = Math.log2(listSize);
@@ -123,7 +151,10 @@ function estimateEntropy(count) {
     const digitsAvg = targetsAvg * 1.5;
     const digitsBits = digitsAvg * Math.log2(10);
 
-    return wordsBits + capBits + digitsBits;
+    // symbols: optional single special char appended/prepended to 1 or 2 targets
+    const symbolsBits = symbolsEnabled ? (targetsAvg * Math.log2(Math.max(2, symbolSetSize))) : 0;
+
+    return wordsBits + capBits + digitsBits + symbolsBits;
 }
 
 function strengthLabel(bits) {
@@ -132,6 +163,118 @@ function strengthLabel(bits) {
     if (bits >= 48) return 'Moderate';
     return 'Weak';
 }
+
+// Compute a detailed entropy breakdown used by the modal
+function computeEntropyBreakdown(count, symbolsEnabled = false, symbolSetSize = 10) {
+    const listSize = Math.max(1, words.length);
+    const bitsPerWord = Math.log2(listSize);
+    const wordsBits = count * bitsPerWord;
+
+    // Capitalization breakdown (1 or 2 words may be capitalized)
+    const maxCaps = Math.min(count, 2);
+    let capChoices = 0;
+    for (let k = 1; k <= maxCaps; k++) {
+        let comb = 1;
+        for (let i = 0; i < k; i++) comb *= (count - i) / (i + 1);
+        capChoices += comb;
+    }
+    const capBits = capChoices > 1 ? Math.log2(capChoices) : 0;
+
+    // Digits: expected targets and digits per target as in estimateEntropy
+    const targetsAvg = count === 1 ? 1 : 1.5;
+    const digitsAvg = targetsAvg * 1.5; // average 1.5 digits per target
+    const digitsBits = digitsAvg * Math.log2(10);
+
+    const symbolsBits = symbolsEnabled ? (targetsAvg * Math.log2(Math.max(2, symbolSetSize))) : 0;
+
+    const total = wordsBits + capBits + digitsBits + symbolsBits;
+    return {
+        wordsBits,
+        capBits,
+        digitsBits,
+        symbolsBits,
+        total,
+        listSize
+    };
+}
+
+function computeRecommendation(bd, count) {
+    const bits = bd.total;
+    const listSize = bd.listSize || Math.max(1, words.length);
+    const bitsPerWord = Math.log2(Math.max(1, listSize));
+
+    if (bits >= 80) return 'Excellent — sufficient entropy.';
+
+    // Choose a sensible next target: 48->Moderate, 64->Strong, 80->Very strong
+    let target;
+    if (bits < 48) target = 48;
+    else if (bits < 64) target = 64;
+    else target = 80;
+
+    if (bitsPerWord <= 0) return 'Increase wordlist size or add more words.';
+
+    const needed = Math.max(0, Math.ceil((target - bits) / bitsPerWord));
+    if (needed <= 0) return `Meets ${strengthLabel(bits)} threshold.`;
+
+    const wordLabel = needed === 1 ? 'word' : 'words';
+    return `Add ${needed} ${wordLabel} (or increase digits/caps) to approach ${target} bits (${target === 80 ? 'Very strong' : target === 64 ? 'Strong' : 'Moderate'}).`;
+}
+
+function showBreakdownModal() {
+    const meta = document.getElementById('passInfo');
+    const modal = document.getElementById('breakdownModal');
+    if (!modal || !meta) return;
+
+    // derive current count from control
+    const countInput = document.getElementById('wordCount');
+    const count = Math.max(1, Math.min(12, parseInt(countInput.value) || 4));
+    const addSymbols = !!document.getElementById('addSymbol') && document.getElementById('addSymbol').checked;
+    const bd = computeEntropyBreakdown(count, addSymbols, SPECIALS.length);
+
+    const f = (v) => (Math.round(v * 10) / 10).toFixed(1) + ' bits';
+    document.getElementById('bdWords').textContent = f(bd.wordsBits);
+    document.getElementById('bdCaps').textContent = f(bd.capBits);
+    document.getElementById('bdDigits').textContent = f(bd.digitsBits);
+    const symbolsEl = document.getElementById('bdSymbols');
+    if (symbolsEl) symbolsEl.textContent = bd.symbolsBits ? (Math.round(bd.symbolsBits*10)/10).toFixed(1) + ' bits' : '0.0 bits';
+    document.getElementById('bdRecommendation').textContent = computeRecommendation(bd, count);
+    document.getElementById('bdTotal').textContent = f(bd.total);
+    document.getElementById('bdListSize').textContent = String(bd.listSize);
+
+    modal.removeAttribute('hidden');
+    // focus the close button for accessibility
+    const closeBtn = modal.querySelector('.modal-close');
+    if (closeBtn) closeBtn.focus();
+}
+
+function closeBreakdownModal() {
+    const modal = document.getElementById('breakdownModal');
+    if (!modal) return;
+    modal.setAttribute('hidden', '');
+}
+
+// Wire up modal open/close handlers
+document.addEventListener('DOMContentLoaded', () => {
+    const meta = document.getElementById('passInfo');
+    if (meta) meta.addEventListener('click', showBreakdownModal);
+
+    const modal = document.getElementById('breakdownModal');
+    if (!modal) return;
+
+    // close button
+    const closeBtn = modal.querySelector('.modal-close');
+    if (closeBtn) closeBtn.addEventListener('click', closeBreakdownModal);
+
+    // clicking outside the modal content closes it
+    modal.addEventListener('click', (ev) => {
+        if (ev.target === modal) closeBreakdownModal();
+    });
+
+    // Esc key closes
+    document.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Escape') closeBreakdownModal();
+    });
+});
 
 function copyText(e) {
     const el = e.target;

@@ -56,6 +56,7 @@ button:hover { cursor: pointer; }
   height: 44px;
   background-color: #273549;
   border-radius: 6px;
+  border: 1px solid rgba(16,185,129,0.04); /* very subtle green border by default */
   color: #10B981;
   display: flex;
   align-items: center;
@@ -66,13 +67,18 @@ button:hover { cursor: pointer; }
   white-space: nowrap;
   overflow: hidden;
   text-align: center;
-  transition: font-size 180ms ease;
+  transition: font-size 180ms ease, border-color 160ms ease, box-shadow 160ms ease;
   position: relative;
 }
 
 /* show pointer on hover to indicate click/copy behavior */
 .password { cursor: default; }
 .password:hover { cursor: pointer; }
+
+.password:hover {
+  border-color: #10B981;
+  box-shadow: 0 10px 30px rgba(16,185,129,0.12);
+}
 
 .password.allow-scroll {
   overflow-x: auto;
@@ -133,6 +139,58 @@ h1 { font-weight: 800; margin: 10px 0; }
 #passmeta { color: #9CA3AF; }
 #passmeta small { color: #9CA3AF; font-size: 13px; }
 
+/* make the metadata clickable */
+#passInfo { cursor: pointer; }
+
+/* Modal styles */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 60;
+}
+.modal-overlay[hidden] { display: none; }
+.modal {
+  position: relative;
+  background: #0F1724;
+  border-radius: 8px;
+  padding: 16px;
+  width: min(420px, 92%);
+  max-width: 420px;
+  box-shadow: 0 10px 30px rgba(2,6,23,0.6);
+  color: #E6EEF8;
+  box-sizing: border-box;
+}
+.modal h3 { margin: 0 0 12px 0; font-size: 18px; text-align: center; }
+.modal-content { margin-top: 8px; }
+.modal-close {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  background: rgba(255,255,255,0.04);
+  border: none;
+  color: #E6EEF8;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(2,6,23,0.45);
+  z-index: 3;
+}
+.modal-close:hover { background: rgba(255,255,255,0.08); }
+.modal ul { list-style: none; padding: 0; margin: 8px 0 0 0; }
+.modal li { padding: 8px 0; border-bottom: 1px dashed rgba(255,255,255,0.04); }
+.modal li strong { display: inline-block; width: 120px; color: #C7E7D6; }
+.modal li span { color: #9BDAB0; }
+
 /* small styled select that shows only a subtle down-arrow */
 .word-select {
   -webkit-appearance: none;
@@ -146,7 +204,7 @@ h1 { font-weight: 800; margin: 10px 0; }
   font-size: 14px;
   line-height: 1;
   cursor: pointer;
-  width: 72px;
+  width: 56px;
   transition: border-color 120ms ease, box-shadow 120ms ease;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path fill='%239CA3AF' d='M6 8L0 0h12z'/></svg>");
   background-repeat: no-repeat;
@@ -168,10 +226,52 @@ h1 { font-weight: 800; margin: 10px 0; }
   border-radius: 6px;
   font-size: 14px;
   line-height: 1;
-  width: 72px;
+  width: 56px;
   transition: border-color 120ms ease, box-shadow 120ms ease;
 }
+.controls label { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
 .compact-input:focus {
   outline: none;
   box-shadow: 0 0 0 3px rgba(16,185,129,0.08);
+}
+
+/* Custom styled checkbox for the 'Add special char' option.
+   Unchecked background matches the passphrase field; checked state is green. */
+#addSymbol {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 1.5px solid rgba(156,163,175,0.22);
+  background-color: #273549; /* same as .password background */
+  display: inline-block;
+  vertical-align: middle;
+  position: relative;
+  cursor: pointer;
+}
+
+#addSymbol::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: transparent;
+}
+
+#addSymbol:checked {
+  background-color: #10B981;
+  border-color: #10B981;
+}
+
+#addSymbol:checked::after {
+  content: '✓';
+  color: #0F1724;
+  font-weight: 700;
 }
