@@ -230,6 +230,35 @@ h1 { font-weight: 800; margin: 10px 0; }
   transition: border-color 120ms ease, box-shadow 120ms ease;
 }
 .controls label { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+
+/* Responsive: on small screens stack the controls vertically */
+@media (max-width: 480px) {
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .controls label {
+    width: 100%;
+    justify-content: space-between;
+    white-space: normal;
+    /* match the generate button width and center */
+    max-width: 200px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* keep the generate button left-aligned in stacked mode */
+  button { display: block; margin: 0 0 0 0; }
+
+  .controls label span { margin-right: 8px; }
+
+  .controls .word-select,
+  .controls .compact-input {
+    width: 84px;
+  }
+}
 .compact-input:focus {
   outline: none;
   box-shadow: 0 0 0 3px rgba(16,185,129,0.08);
