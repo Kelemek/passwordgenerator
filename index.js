@@ -24,8 +24,9 @@ function randInt(max) {
     return Math.floor(Math.random() * max);
 }
 
-// Small set of special characters used when the 'Add special char' option is enabled
-const SPECIALS = ['!', '@', '#', '$', '%', '^', '&', '*', '?', '~'];
+// Single safe symbol set (exclude quotes, backslash, angle-brackets and other often-problematic chars)
+const SPECIALS = ['!', '@', '#', '$', '%', '^', '&', '*', '?', '~', '-', '_', '+', '=', ':', ';', ',', '.', '/'];
+
 
 function pickWords(count) {
     const picked = [];
