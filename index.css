@@ -37,6 +37,9 @@ button {
   font-size: 16px;
 }
 
+/* Make it obvious the generate button is clickable */
+button:hover { cursor: pointer; }
+
 #password {
   display: flex;
   flex-direction: row;
@@ -66,6 +69,10 @@ button {
   transition: font-size 180ms ease;
   position: relative;
 }
+
+/* show pointer on hover to indicate click/copy behavior */
+.password { cursor: default; }
+.password:hover { cursor: pointer; }
 
 .password.allow-scroll {
   overflow-x: auto;
