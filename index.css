@@ -35,25 +35,22 @@ button {
   border-radius: 6px;
   font-weight: 500;
   font-size: 16px;
-  margin-top: 24px;
 }
 
 #password {
   display: flex;
   flex-direction: row;
-  flex-wrap: wrap;  
+  flex-wrap: nowrap;
   gap: 12px;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   width: 100%;
-  margin-top: 18px;
 }
 
 
 .password {
-  flex: 1 1 48%; 
-  min-width: 140px;   
-  height: 40px;
+  width: 100%;
+  height: 44px;
   background-color: #273549;
   border-radius: 6px;
   color: #10B981;
@@ -61,11 +58,113 @@ button {
   align-items: center;
   justify-content: center;
   font-weight: 500;
-  font-size: 16px;
+  font-size: 20px;
+  padding: 0 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-align: center;
+  transition: font-size 180ms ease;
+  position: relative;
 }
 
+.password.allow-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  cursor: text;
+  /* ensure a few pixels are always visible when scrolling */
+  padding-left: 12px;
+  padding-right: 12px;
+  /* Reserve scrollbar gutter so content doesn't jump under the scrollbar */
+  scrollbar-gutter: stable;
+}
 
-hr { border: 1px solid #2F3E53; margin: 24px 0; }
+/* subtle right edge fade when content is scrollable to indicate overflow */
+/* Fade overlays; shown only when corresponding fade classes are present */
+.password.fade-right::after {
+  content: '';
+  position: absolute;
+  /* keep fade inset from padding a bit */
+  right: 8px;
+  top: 0;
+  width: 28px;
+  height: 100%;
+  pointer-events: none;
+  /* more subtle fade so text isn't fully obscured */
+  background: linear-gradient(to right, rgba(39,53,73,0), rgba(39,53,73,0.6));
+  border-top-right-radius: 6px;
+  border-bottom-right-radius: 6px;
+}
+
+.password.fade-left::before {
+  content: '';
+  position: absolute;
+  left: 8px;
+  top: 0;
+  width: 28px;
+  height: 100%;
+  pointer-events: none;
+  background: linear-gradient(to left, rgba(39,53,73,0), rgba(39,53,73,0.6));
+  border-top-left-radius: 6px;
+  border-bottom-left-radius: 6px;
+}
+
+/* Copy button inside the passphrase box */
+/* copy button removed - styles cleared */
+
+
+hr {
+  border: none;
+  height: 1.5px;
+  background-color: rgba(255,255,255,0.06);
+  margin: 20px 0;
+  width: 100%;
+}
 p { margin: 0; }
 h1 { font-weight: 800; margin: 10px 0; }
 #green { color: #10B981; }
+
+#passmeta { color: #9CA3AF; }
+#passmeta small { color: #9CA3AF; font-size: 13px; }
+
+/* small styled select that shows only a subtle down-arrow */
+.word-select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-color: transparent;
+  color: inherit;
+  border: 1.5px solid rgba(156,163,175,0.22);
+  padding: 6px 32px 6px 10px;
+  border-radius: 6px;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  width: 72px;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path fill='%239CA3AF' d='M6 8L0 0h12z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 12px 8px;
+}
+
+.word-select:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(16,185,129,0.12);
+}
+
+/* compact input to match the dropdown appearance */
+.compact-input {
+  background-color: transparent;
+  color: inherit;
+  border: 1.5px solid rgba(156,163,175,0.22);
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 14px;
+  line-height: 1;
+  width: 72px;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+.compact-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(16,185,129,0.08);
+}

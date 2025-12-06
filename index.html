@@ -8,13 +8,30 @@
     </head>
     <body>
         <div class="box">
-            <h1>Generate a<br><span id="green">random password</span></h1>
+            <h1>Generate a<br><span id="green">random passphrase</span></h1>
             <p>Never use an insecure password again.</p>
-            <button id="generate" onclick="generatePassword()">Generate passwords</button>
+
+            <div class="controls" style="margin:16px 0; display:flex; gap:12px; align-items:center;">
+                <label style="font-size:14px">Words:
+                    <select id="wordCount" class="word-select" style="margin-left:6px;">
+                        <option value="3">3</option>
+                        <option value="4" selected>4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                    </select>
+                </label>
+                <label style="font-size:14px">Separator:
+                    <input id="separator" class="compact-input" type="text" value="-" maxlength="3" style="margin-left:6px;" />
+                </label>
+            </div>
+
+            <button id="generate" onclick="generatePassphrase()">Generate</button>
             <hr>
             <div id="password">
-                <span class="password" id="password1" onclick="copyText(event)"></span>
-                <span class="password" id="password2" onclick="copyText(event)"></span>
+                <span class="password" id="password1" onclick="copyCurrentPassphrase()"></span>
+            </div>
+            <div id="passmeta" style="margin-top:8px;">
+                <small id="passInfo">&nbsp;</small>
             </div>
         </div>
         <script src="index.js"></script>
