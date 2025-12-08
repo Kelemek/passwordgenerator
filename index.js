@@ -107,24 +107,61 @@ function generatePassphrase() {
     const sepInput = document.getElementById("separator");
     const count = Math.max(1, Math.min(12, parseInt(countInput.value) || 4));
     const sep = sepInput.value || "-";
-    // Build passphrase from words array so we can optionally insert symbols
-    const picked = pickWords(count);
-    randomizeFirstLetters(picked);
-    insertRandomDigitsIntoWords(picked);
+    // If user supplied a maximum total length, attempt to satisfy it by
+    // generating several candidates. If impossible with the requested word
+    // count, try reducing word count until a candidate fits.
+    const maxEl = document.getElementById('maxLength');
+    const maxVal = maxEl ? parseInt(maxEl.value, 10) : 0;
+    const limitEnabled = Number.isFinite(maxVal) && maxVal > 0;
+    const MAX_TOTAL = limitEnabled ? maxVal : Infinity;
     const addSymbols = !!document.getElementById('addSymbol') && document.getElementById('addSymbol').checked;
-    if (addSymbols) insertRandomSpecialCharsIntoWords(picked);
-    const pass = picked.join(sep);
+
+    // helper: try to create a passphrase with `c` words up to a limited number of attempts
+    function tryWithCount(c, attempts = 300) {
+        for (let a = 0; a < attempts; a++) {
+            const picked = pickWords(c);
+            randomizeFirstLetters(picked);
+            insertRandomDigitsIntoWords(picked);
+            if (addSymbols) insertRandomSpecialCharsIntoWords(picked);
+            const candidate = picked.join(sep);
+            if (!limitEnabled || candidate.length <= MAX_TOTAL) return { pass: candidate, usedCount: c };
+        }
+        return null;
+    }
+
+    let result = null;
+    if (limitEnabled) {
+        // try starting from the requested count down to 1
+        for (let c = count; c >= 1; c--) {
+            result = tryWithCount(c, 300);
+            if (result) break;
+        }
+    } else {
+        result = tryWithCount(count, 1); // single attempt is fine without limit
+    }
+
+    // fallback: if no candidate found (very unlikely), generate unconstrained once
+    if (!result) {
+        const picked = pickWords(count);
+        randomizeFirstLetters(picked);
+        insertRandomDigitsIntoWords(picked);
+        if (addSymbols) insertRandomSpecialCharsIntoWords(picked);
+        result = { pass: picked.join(sep), usedCount: count };
+    }
+
+    const pass = result.pass;
+    const usedCount = result.usedCount;
     const out = document.getElementById("password1");
     out.textContent = pass;
     fitTextToContainer(out, 14, 20);
 
-    // update metadata: character length and word count
+    // update metadata: character length and actual word count used
     const meta = document.getElementById('passInfo');
     if (meta) {
-        const addSymbols = !!document.getElementById('addSymbol') && document.getElementById('addSymbol').checked;
-        const bits = estimateEntropy(count, addSymbols, SPECIALS.length);
+        const bits = estimateEntropy(usedCount, addSymbols, SPECIALS.length);
         const label = strengthLabel(bits);
-        meta.textContent = `${pass.length} characters · ${count} words · ${Math.round(bits)} bits (${label})`;
+        const suffix = usedCount !== count && limitEnabled ? ` (reduced from ${count} words)` : '';
+        meta.textContent = `${pass.length} characters · ${usedCount} words${suffix} · ${Math.round(bits)} bits (${label})`;
     }
 }
 
@@ -291,9 +328,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const wc = document.getElementById('wordCount');
     const sep = document.getElementById('separator');
     const addSym = document.getElementById('addSymbol');
+    const max = document.getElementById('maxLength');
     if (wc) wc.addEventListener('change', saveOptions);
     if (sep) sep.addEventListener('input', saveOptions);
     if (addSym) addSym.addEventListener('change', saveOptions);
+    if (max) max.addEventListener('input', saveOptions);
 
     // Do not auto-generate on load. Leave the passphrase blank so users must
     // explicitly generate one each session. Clear any previous display.
@@ -319,6 +358,14 @@ function getOptionsFromDOM() {
         wordCount: wc ? wc.value : null,
         separator: sep ? sep.value : null,
         addSymbol: addSym ? !!addSym.checked : null
+        ,maxLength: (function(){
+            const m = document.getElementById('maxLength');
+            if (!m) return null;
+            const v = m.value;
+            if (v === null || v === undefined || v === '') return null;
+            const n = parseInt(v, 10);
+            return Number.isFinite(n) ? n : null;
+        })()
     };
 }
 
@@ -330,6 +377,8 @@ function applyOptionsToDOM(opts) {
     if (wc && opts.wordCount != null) wc.value = String(opts.wordCount);
     if (sep && opts.separator != null) sep.value = String(opts.separator);
     if (addSym && opts.addSymbol != null) addSym.checked = !!opts.addSymbol;
+    const max = document.getElementById('maxLength');
+    if (max && opts.maxLength != null) max.value = String(opts.maxLength);
 }
 
 function saveOptions() {

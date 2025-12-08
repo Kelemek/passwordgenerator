@@ -8,25 +8,34 @@
     </head>
     <body>
         <div class="box">
-            <h1>Generate a<br><span id="green">random passphrase</span></h1>
+            <h1>Generate a<br><span id="green">passphrase</span></h1>
             <p>Never use an insecure password again.</p>
 
-            <div class="controls" style="margin:16px 0; display:flex; gap:12px; align-items:center;">
-                <label style="font-size:14px">Words:
-                    <select id="wordCount" class="word-select" style="margin-left:6px;">
-                        <option value="3">3</option>
-                        <option value="4" selected>4</option>
-                        <option value="5">5</option>
-                        <option value="6">6</option>
-                    </select>
-                </label>
-                <label style="font-size:14px">Separator:
-                    <input id="separator" class="compact-input" type="text" value="-" maxlength="3" style="margin-left:6px;" />
-                </label>
-                <label style="font-size:14px; display:flex; align-items:center; gap:8px;">
-                    <span style="font-size:14px;">Special char:</span>
-                    <input id="addSymbol" type="checkbox" style="width:18px; height:18px;" checked />
-                </label>
+            <div class="controls" style="margin:16px 0; display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+                <div style="display:flex; gap:12px; align-items:center;">
+                  <label style="font-size:14px">Words:
+                      <select id="wordCount" class="word-select" style="margin-left:6px;">
+                          <option value="3">3</option>
+                          <option value="4" selected>4</option>
+                          <option value="5">5</option>
+                          <option value="6">6</option>
+                      </select>
+                  </label>
+                  <label style="font-size:14px">Separator:
+                      <input id="separator" class="compact-input" type="text" value="-" maxlength="3" style="margin-left:6px;" />
+                  </label>
+                </div>
+
+                                <div style="display:flex; gap:16px; align-items:center; width:100%; margin-top:6px;">
+                                    <label style="font-size:14px; display:flex; align-items:center; gap:8px;">
+                                            <span style="font-size:14px;">Max length:</span>
+                                              <input id="maxLength" class="compact-input" type="number" min="1" max="64" step="1" inputmode="numeric" style="margin-left:6px;" />
+                                    </label>
+                                    <label style="font-size:14px; display:flex; align-items:center; gap:8px;">
+                                            <span style="font-size:14px;">Special char:</span>
+                                            <input id="addSymbol" type="checkbox" style="width:18px; height:18px;" checked />
+                                    </label>
+                                </div>
                 <!-- single safe symbol set used by default (no unsafe chars) -->
             </div>
 
