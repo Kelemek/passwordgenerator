@@ -332,7 +332,50 @@ document.addEventListener('DOMContentLoaded', () => {
     if (wc) wc.addEventListener('change', saveOptions);
     if (sep) sep.addEventListener('input', saveOptions);
     if (addSym) addSym.addEventListener('change', saveOptions);
-    if (max) max.addEventListener('input', saveOptions);
+    if (max) {
+        // sanitize input to digits only so non-numeric characters are removed
+        max.addEventListener('input', (ev) => {
+            const el = ev.target;
+            // allow empty value; otherwise strip non-digits
+            const cleaned = (el.value || '').replace(/[^0-9]/g, '');
+            if (cleaned !== el.value) el.value = cleaned;
+            saveOptions();
+        });
+
+        // Prevent non-digit keys (allow navigation/editing keys)
+        max.addEventListener('keydown', (ev) => {
+            const allowed = ["Backspace","Tab","Enter","Escape","ArrowLeft","ArrowRight","ArrowUp","ArrowDown","Home","End","Delete"];
+            if (allowed.includes(ev.key)) return;
+            // Allow digits only
+            if (/^[0-9]$/.test(ev.key)) return;
+            // block everything else (including 'e', '+', '-', '.')
+            ev.preventDefault();
+        });
+
+        // Sanitize pasted content
+        max.addEventListener('paste', (ev) => {
+            try {
+                const txt = (ev.clipboardData || window.clipboardData).getData('text') || '';
+                const cleaned = txt.replace(/[^0-9]/g, '');
+                if (cleaned !== txt) {
+                    ev.preventDefault();
+                    // insert cleaned text at the cursor position
+                    const el = ev.target;
+                    const start = el.selectionStart || 0;
+                    const end = el.selectionEnd || 0;
+                    const val = el.value || '';
+                    el.value = val.slice(0, start) + cleaned + val.slice(end);
+                    // move cursor after inserted text
+                    const pos = start + cleaned.length;
+                    el.setSelectionRange(pos, pos);
+                    // trigger input handler
+                    el.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+            } catch (e) {
+                // ignore clipboard errors and allow default behavior
+            }
+        });
+    }
 
     // Do not auto-generate on load. Leave the passphrase blank so users must
     // explicitly generate one each session. Clear any previous display.
