@@ -212,22 +212,22 @@ h1 { font-weight: 800; margin: 10px 0; }
   background-size: 12px 8px;
 }
 
-/* Ensure option text is readable in browsers (Edge may inherit white text color) */
+/* Ensure option text is readable in browsers; use passphrase-blue background */
 .word-select option {
-  color: #0F1724; /* dark text for readability on white option backgrounds */
-  background-color: #FFFFFF;
+  color: #E6EEF8; /* light text on blue background */
+  background-color: #273549; /* match .password background */
 }
 
 /* Additional Windows-specific override: Edge on Windows may render native dropdowns
    with foreground matching page text; when platform-windows is present force dark
    text and white background to ensure readability. */
 .platform-windows .word-select {
-  color: #0F1724 !important;
-  background-color: #FFFFFF !important;
+  color: inherit !important;
+  background-color: #273549 !important;
 }
 .platform-windows .word-select option {
-  color: #0F1724 !important;
-  background-color: #FFFFFF !important;
+  color: #E6EEF8 !important;
+  background-color: #273549 !important;
 }
 
 .word-select:focus {
