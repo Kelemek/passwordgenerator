@@ -279,6 +279,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Load saved options from localStorage (if any) and wire change handlers
     loadOptions();
 
+    // Platform detection: add a class for Windows so we can target Windows-specific styling
+    try {
+        const isWin = navigator.platform && /Win/.test(navigator.platform) || (navigator.userAgent && /Windows/.test(navigator.userAgent));
+        if (isWin) document.documentElement.classList.add('platform-windows');
+    } catch (e) {
+        // ignore
+    }
+
     // save options when controls change
     const wc = document.getElementById('wordCount');
     const sep = document.getElementById('separator');
