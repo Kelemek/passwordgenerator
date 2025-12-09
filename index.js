@@ -645,13 +645,13 @@ function updateStrengthMeter(entropy) {
     
     // Set color and label based on strength
     let strength, color;
-    if (entropy < 40) {
+    if (entropy < 48) {
         strength = 'Weak';
         color = '#EF4444'; // red
-    } else if (entropy < 70) {
+    } else if (entropy < 64) {
         strength = 'Moderate';
         color = '#F59E0B'; // amber
-    } else if (entropy < 100) {
+    } else if (entropy < 80) {
         strength = 'Strong';
         color = '#10B981'; // green
     } else {
