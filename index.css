@@ -247,6 +247,29 @@ h1 { font-weight: 800; margin: 10px 0; }
   width: 56px;
   transition: border-color 120ms ease, box-shadow 120ms ease;
 }
+
+/* Make the up/down spinner arrows in numeric inputs more visible (white)
+   Best-effort: color native WebKit spin buttons and add a white SVG
+   fallback as a background image. Some browsers (Firefox) draw native
+   controls that aren't fully styleable — the background ensures
+   consistent visual in those cases. */
+input.compact-input[type="number"] {
+  /* keep same padding as other compact inputs; no spinner background */
+  padding-right: 10px;
+  /* Firefox: remove native number input spinner by using textfield appearance */
+  -moz-appearance: textfield;
+}
+
+/* Hide native spinner controls (WebKit/Chrome/Safari) so no native
+   arrows are shown; we rely on the compact-input styling instead. */
+input.compact-input[type="number"]::-webkit-inner-spin-button,
+input.compact-input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Remove inner focus border in Firefox for consistent alignment */
+input.compact-input[type="number"]::-moz-focus-inner { border: 0; }
 .controls label { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
 
 /* Responsive: on small screens stack the controls vertically */
