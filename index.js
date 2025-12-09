@@ -167,6 +167,9 @@ function generatePassphrase() {
         const label = strengthLabel(bits);
         const suffix = usedCount !== count && limitEnabled ? ` (reduced from ${count} words)` : '';
         meta.textContent = `${pass.length} characters · ${usedCount} words${suffix} · ${Math.round(bits)} bits (${label})`;
+        
+        // Update the strength meter
+        updateStrengthMeter(bits);
     }
 }
 
@@ -626,6 +629,39 @@ async function loadEFFWordlist() {
         }
     })();
     return effLoadPromise;
+}
+
+// Update the strength meter based on entropy
+function updateStrengthMeter(entropy) {
+    const meterFill = document.querySelector('.strength-meter-fill');
+    const meterLabel = document.querySelector('.strength-label');
+    
+    // Cap entropy at 120 for display purposes (beyond this is overkill)
+    const displayEntropy = Math.min(entropy, 120);
+    const percentage = Math.min(100, (displayEntropy / 100) * 100);
+    
+    // Set meter width based on percentage
+    meterFill.style.width = `${percentage}%`;
+    
+    // Set color and label based on strength
+    let strength, color;
+    if (entropy < 40) {
+        strength = 'Weak';
+        color = '#EF4444'; // red
+    } else if (entropy < 70) {
+        strength = 'Moderate';
+        color = '#F59E0B'; // amber
+    } else if (entropy < 100) {
+        strength = 'Strong';
+        color = '#10B981'; // green
+    } else {
+        strength = 'Very Strong';
+        color = '#3B82F6'; // blue
+    }
+    
+    meterFill.style.backgroundColor = color;
+    meterLabel.textContent = strength;
+    meterLabel.style.color = color;
 }
 
 // Kick off loading in background; generatePassphrases will await this if needed.
