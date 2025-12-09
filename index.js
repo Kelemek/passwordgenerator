@@ -21,7 +21,20 @@ const words = [
 ];
 
 function randInt(max) {
-    return Math.floor(Math.random() * max);
+    // Use cryptographically secure random number generation
+    if (max <= 0) return 0;
+    const array = new Uint32Array(1);
+    crypto.getRandomValues(array);
+    // Convert to a value between 0 and max-1
+    // Using modulo with rejection sampling to avoid bias
+    const maxValid = Math.floor(0xFFFFFFFF / max) * max;
+    let value = array[0];
+    // Rejection sampling: if value is in the biased range, get a new random value
+    while (value >= maxValid) {
+        crypto.getRandomValues(array);
+        value = array[0];
+    }
+    return value % max;
 }
 
 // Single safe symbol set (exclude quotes, backslash, angle-brackets and other often-problematic chars)
