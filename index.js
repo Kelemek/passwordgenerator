@@ -1,6 +1,5 @@
 // Small embedded wordlist. This will be replaced at runtime if a local
-// `eff-wordlist.txt` file exists (one word per line). Use the provided
-// `scripts/fetch_eff.sh` to download the official EFF large wordlist.
+// `eff-wordlist.txt` file exists (one word per line).
 const words = [
     "able","about","acid","across","act","addition","adjustment","advertisement","after","again",
     "against","agreement","air","all","almost","among","amount","amusement","and","angle","angry",
@@ -106,13 +105,6 @@ function insertRandomSpecialCharsIntoWords(wordsArr) {
         const placeAtStart = randInt(2) === 0;
         wordsArr[idx] = placeAtStart ? (sym + wordsArr[idx]) : (wordsArr[idx] + sym);
     });
-}
-
-function createPassphrase(count = 4, separator = "-") {
-    const picked = pickWords(count);
-    randomizeFirstLetters(picked);
-    insertRandomDigitsIntoWords(picked);
-    return picked.join(separator);
 }
 
 function generatePassphrase() {
@@ -455,48 +447,6 @@ function loadOptions() {
     } catch (err) {
         console.warn('Could not load options from localStorage', err);
     }
-}
-
-function copyText(e) {
-    const el = e.target;
-    const clickedText = el.textContent;
-    if (!clickedText) return;
-
-    const original = clickedText;
-    // Try modern clipboard API first, fallback to execCommand for file:// or older browsers
-    (async () => {
-        try {
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                await navigator.clipboard.writeText(clickedText);
-            } else {
-                // fallback: create a temporary textarea, select and exec copy
-                const ta = document.createElement('textarea');
-                ta.value = clickedText;
-                ta.setAttribute('readonly', '');
-                ta.style.position = 'absolute';
-                ta.style.left = '-9999px';
-                document.body.appendChild(ta);
-                ta.select();
-                document.execCommand('copy');
-                document.body.removeChild(ta);
-            }
-
-            el.textContent = 'Copied to clipboard!';
-            fitTextToContainer(el);
-            setTimeout(() => {
-                el.textContent = original;
-                fitTextToContainer(el);
-            }, 1500);
-        } catch (err) {
-            console.warn('Copy failed', err);
-            el.textContent = 'Copy failed';
-            fitTextToContainer(el);
-            setTimeout(() => {
-                el.textContent = original;
-                fitTextToContainer(el);
-            }, 1500);
-        }
-    })();
 }
 
 // Copy using the current passphrase (used by the explicit button) with robust fallbacks
